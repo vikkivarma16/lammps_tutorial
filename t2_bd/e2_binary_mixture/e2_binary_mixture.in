@@ -1,0 +1,121 @@
+# Defining the essential variables
+
+units lj 
+dimension 3
+atom_style atomic
+boundary p p p 
+
+
+
+
+# Creating a large box with memory space for two kinds of particles
+
+region my_box block 0 90 0 90 0 90
+create_box 2 my_box
+
+
+
+
+# Generating atoms
+
+create_atoms 1 random 3000 87910 my_box overlap 1.5 maxtry 50
+create_atoms 2 random 3000 87911 my_box overlap 1.5 maxtry 50
+
+
+
+
+# Defining particle's properties
+
+mass 1 1.0
+mass 2 1.0
+
+pair_style lj/cut 2.4
+pair_coeff  1  1  0.01  1.  1.5
+pair_coeff  1  2  0.01  1.55  2.1
+pair_coeff  2  2  0.01  2.  2.2
+
+
+
+
+# Creaing initial velocities
+
+velocity all create 1.0 12345 mom yes rot no  # Assign initial velocities
+
+
+
+
+# Fixing an NpT integrator
+
+fix my_pressure all npt temp 1 1 1 iso 3 3 1
+
+
+
+
+# Setting specifications for the information printing on terminal
+
+thermo 100
+thermo_style custom step temp ke pe press vol
+
+
+
+
+# Running the code
+
+run 50000
+
+
+
+
+# Revoking the NpT integrator
+
+unfix my_pressure
+
+
+
+
+# Resetting the simulation time
+
+reset_timestep 0
+
+
+
+
+# Setting up Brownian dynamics through the Langevin Thermostat
+
+fix my_thermo_stat all langevin 1  1 .1 89080
+
+
+
+
+# Applying an integrator to update the position and velocities of the particles
+
+fix integrator all nve 
+
+
+
+
+# Time achieved in LJ unit with each simulation steps
+
+timestep 0.005
+
+
+
+
+# Setting specifications for the information printing on terminal
+
+thermo 100
+thermo_style custom step temp ke pe press
+
+
+
+
+# Setting the output file and the data to print
+
+dump 1 all custom 100 simulation_data.lammpstrj id type x y z vx vy vz 
+
+
+
+
+# Running the simulation
+
+run 200000
