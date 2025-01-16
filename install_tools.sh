@@ -31,6 +31,12 @@ vim --version
 gnuplot --version
 lmp -help | head -n 5
 
+sudo apt install python3-scipy
+
+sudo apt install python3-matplotlib 
+
+sudo apt install python3-numpy
+
 # Success message
 echo "All requested packages and tools have been installed successfully."
 
