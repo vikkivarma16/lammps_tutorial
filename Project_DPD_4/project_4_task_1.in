@@ -1,0 +1,149 @@
+# Defining essential variables
+
+units lj 
+dimension 3
+atom_style molecular
+boundary p p p 
+
+
+
+
+
+
+
+
+# Creating simulation box
+
+region my_box block -10 10 -10 10 -10 10
+region my_shell_region_1 sphere 0.0 0.0 0.0 4.5 side in
+region my_shell_region_2 sphere 0.0 0.0 0.0 5 side out
+
+region my_shell_region_polymer sphere 0.0 0.0 0.0 1 side in
+
+
+
+
+create_box 2 my_box  bond/types 1  extra/bond/per/atom 12 extra/special/per/atom 12
+
+
+
+
+
+# Creating the narrow regions and generating the particle such that initial particle distribution remains a delta function distribution
+
+
+molecule shells shell_template.mol
+molecule pol polymer_template.mol toff 1
+
+
+create_atoms 0 single 0.0 0.0 0.0 mol shells 90843
+create_atoms 0 random 100 87910 my_shell_region_polymer mol pol 454336 
+
+
+
+
+group particles type 2
+
+bond_style harmonic
+bond_coeff 1 100.0 1.0
+
+
+# Setting up interaction parameters and the other variables
+
+mass 1 1
+mass 2 .1
+
+
+pair_style hybrid lj/cut 2.0 soft 1.0
+
+pair_coeff 1 1  lj/cut 0.01 0.05 0.05
+pair_coeff 1 2  lj/cut 0.01 0.4 0.4
+pair_coeff 2 2  soft 1.0 1
+
+
+
+comm_modify cutoff 2.0
+
+
+
+# Creating initial velocity distribution at particular temperature
+
+velocity all create 1.0 12345 
+
+
+
+
+
+
+
+# Setting up Langevin thermostat and fixing integrator
+
+fix my_thermo_stat_1 particles langevin 2  2  0.1 89080
+compute regional_thermo_1 particles temp/region my_shell_region_1
+fix_modify my_thermo_stat_1 temp regional_thermo_1
+
+
+
+
+
+
+
+fix my_thermo_stat_2 particles langevin 1  1  0.1 890809
+compute regional_thermo_2 particles temp/region my_shell_region_2
+fix_modify my_thermo_stat_2 temp regional_thermo_2
+
+
+
+
+
+
+
+
+fix integrator particles nve 
+
+
+
+
+
+
+
+# Setting up time steps in lj unit achieved by each simulation steps
+
+timestep 0.0005
+
+
+
+
+
+
+
+
+
+# Setting up the parameters to be printed on the terminal
+
+thermo 100
+thermo_style custom step temp ke pe press
+
+
+
+compute chunk_1 particles chunk/atom bin/sphere 0.0  0.0  0.0  0 10.0 10
+compute myChunk1 particles property/chunk chunk_1 count
+fix 1 all ave/time 100 1 100 c_myChunk1 file bin_particles.lammpstrj mode vector
+
+
+
+
+
+# Exporting the data file 
+
+
+dump 1 all custom 10 simulation_data.lammpstrj id type x y z
+
+
+
+
+
+
+# Running the simulation
+
+run 100000
