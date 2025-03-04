@@ -905,17 +905,43 @@ while line:
 fu.close()  
 
 # Writing to the output file
-su.write(f"\n{len(valid_particles)} atoms\n\n")  # Write valid particle count
+su.write(f"\n{2*len(valid_particles)} atoms\n")  # Write valid particle count
+su.write(f"\n{len(valid_particles)} bonds\n\n")  # Write valid particle count
 su.write("Coords\n\n")  # Section title
 
 for atom in valid_particles:
     su.write(f"{atom[0]} {atom[1]:.4f} {atom[2]:.4f} {atom[3]:.4f}\n")  
+    
+for atom in valid_particles:
+
+    center = [0.0, 0.0, 0.0]
+    dx = float(atom[1])- center[0]
+    dy = float(atom[2])- center[1]
+    dz = float(atom[3])- center[2]
+    mag = (dx*dx + dy*dy + dz*dz)**0.5
+    dx =  dx / mag
+    dy =  dy / mag
+    dz =  dz / mag
+    displacement = -0.1
+    
+    su.write(f"{len(valid_particles)+atom[0]} {atom[1] + dx * displacement :.4f} {atom[2] + dy * displacement:.4f} {atom[3] + dz * displacement:.4f}\n")  
 
 su.write("\nTypes\n\n")  # Section title for atom types  
 
 for atom in valid_particles:
     atom_type = 1  # Assigning type 1 to all atoms
     su.write(f"{atom[0]} {atom_type}\n")  
+for atom in valid_particles:
+    atom_type = 1  # Assigning type 1 to all atoms
+    su.write(f"{atom[0] + len(valid_particles)} {atom_type+1}\n")   
+
+su.write("\n")
+    
+su.write("Bonds \n\n")
+
+for atom in valid_particles:
+    su.write(f"{atom[0]} {atom_type} {atom[0]}  {atom[0]+len(valid_particles)} \n")
+    
 
 su.close()  
 
