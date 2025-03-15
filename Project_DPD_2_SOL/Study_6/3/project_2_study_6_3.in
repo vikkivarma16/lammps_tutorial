@@ -1,0 +1,131 @@
+# DPD Fluid
+
+
+
+
+variable T    equal 1.0
+variable rc   equal 1.0
+variable rcD  equal 1.0
+
+
+
+
+units        lj
+boundary     p p p
+atom_style   molecular
+dimension    3
+newton       on
+comm_modify  vel yes
+
+
+
+
+# Creating simulation box
+region my_box block -7.5  7.5  -7.07  7.07  -7.07  7.07
+region my_box_region_1 block -4  4   -7.07  7.07  -7.07  7.07
+region my_box_region_2 block -7.5  -6   -7.07  7.07  -7.07  7.07
+region my_box_region_3 block 6  7.5   -7.07  7.07  -7.07  7.07
+
+
+region my_box_region_pol block -2.0 2.0 -5 5 -5 5
+
+
+
+create_box 5 my_box  bond/types 2  extra/bond/per/atom 12 extra/special/per/atom 12
+
+
+
+
+# Creating the narrow regions and generating the particle such that initial particle distribution remains a delta function distribution
+molecule trap hexagonal_lattice_hollow.mol
+molecule pol polymer_template.mol toff 2 boff 1 
+
+
+
+
+create_atoms 0 single 5 0.0 0.0 mol trap 4545545  rotate  0.0  1.0  0  0
+create_atoms 0 single -5 0.0 0.0 mol trap 4545545  rotate  0.0  1.0  0  0
+create_atoms 0 random 10 87910 my_box_region_pol mol pol 454336
+create_atoms 4 random 6000 87950 my_box_region_1 
+create_atoms 5 random 1200 87950 my_box_region_2
+create_atoms 5 random 1200 87950 my_box_region_3
+
+
+
+bond_style harmonic
+bond_coeff 1 1000.0 0.5
+bond_coeff 2 80.0 1.0
+
+
+
+
+mass     1 1.0
+mass     2 5.0
+mass     3 1.0
+mass     4 1.0
+mass     5 1.0
+
+
+group particles type 3
+
+
+
+
+
+pair_style hybrid lj/cut 0.7 dpd ${T} ${rcD} 38542
+
+
+pair_coeff   1 1 none
+pair_coeff   1 2 dpd 1000.  4.5  0.5
+pair_coeff   2 2 dpd 5000.  4.5  0.4
+pair_coeff   3 3 dpd 100.0  4.5  1.
+pair_coeff   4 4 dpd 25.0  4.5  1.
+pair_coeff   5 5 dpd 25.0  4.5  1.
+pair_coeff   1 3 lj/cut 1.0  0.7  0.7
+pair_coeff   1 4 lj/cut 1.0  0.7  0.7
+pair_coeff   1 5 lj/cut 1.0  0.7  0.7
+pair_coeff   2 3 dpd 30.0  4.5  1.
+pair_coeff   2 4 dpd 25.0  4.5  1.
+pair_coeff   2 5 dpd 30.0  4.5  1
+pair_coeff   3 4 dpd 35.0  4.5  1.
+pair_coeff   3 5 dpd 25.0  4.5  1.
+pair_coeff   4 5 dpd 50.0  4.5  1.
+
+
+
+
+group part type 2 3 4 5
+timestep     0.005
+run_style    verlet
+
+
+
+
+comm_modify vel yes
+comm_modify cutoff 4.0
+
+
+
+
+thermo_style custom step time temp press
+thermo       100
+
+
+
+
+velocity part create ${T} 68768932
+
+
+fix integrator part nve
+
+compute chunk_1 particles chunk/atom bin/1d x lower 0.05 units reduced
+compute myChunk1 particles property/chunk chunk_1 count
+fix 1 all ave/time 5 1 100 c_myChunk1 file bin_particles.lammpstrj mode vector
+ 
+dump 2 all custom 100 simulation_data_task_1.lammpstrj id type x y z vx vy vz
+
+
+
+
+# Production run to measure MSD
+run          500000
