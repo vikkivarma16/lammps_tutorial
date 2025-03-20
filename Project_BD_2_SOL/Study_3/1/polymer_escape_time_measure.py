@@ -24,9 +24,9 @@ def parse_lammps_chunk_data(filename):
     return time_data
 
 def count_escaped_particles(time_data, dx):
-    escape_x_min, escape_x_max = 10.5, 54  # Escape region on the left
-    escape_x_min_2, escape_x_max_2 = 10.5, 54  # Escape region on the right
-    trapped_x_min, trapped_x_max = 0, 10.5  # Trapped region
+    escape_x_min, escape_x_max = 11, 54  # Escape region on the left
+    escape_x_min_2, escape_x_max_2 = 11, 54  # Escape region on the right
+    trapped_x_min, trapped_x_max = 0, 11  # Trapped region
     
     escape_fraction = {}
     total_particles_initial = None

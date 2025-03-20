@@ -15,11 +15,11 @@ boundary p p p
 # Creating simulation box
 
 region my_box block 0 53.8 -10 10 -10 10
-region my_shell_region_1 sphere 5.2461 0.0 0.0 5.246 side in
-region my_shell_region_2 sphere 15.7461 0.0 0.0 5.246 side in
-region my_shell_region_3 sphere 26.2361 0.0 0.0 5.246 side in
-region my_shell_region_4 sphere 36.7261 0.0 0.0 5.246 side in
-region my_shell_region_5 sphere 47.2161 0.0 0.0 5.246 side in
+region my_shell_region_1 sphere 5.2461 0.0 0.0 5.24 side in
+region my_shell_region_2 sphere 15.7461 0.0 0.0 5.24 side in
+region my_shell_region_3 sphere 26.2361 0.0 0.0 5.24 side in
+region my_shell_region_4 sphere 36.7261 0.0 0.0 5.24 side in
+region my_shell_region_5 sphere 47.2161 0.0 0.0 5.24 side in
 
 
 
@@ -100,22 +100,22 @@ compute regional_thermo_1 particles temp/region my_shell_region_1
 fix_modify my_thermo_stat_1 temp regional_thermo_1
 
 
-fix my_thermo_stat_2 particles langevin 2  2  0.5 890809
+fix my_thermo_stat_2 particles langevin 3  3  0.5 890809
 compute regional_thermo_2 particles temp/region my_shell_region_2
 fix_modify my_thermo_stat_2 temp regional_thermo_2
 
 
-fix my_thermo_stat_3 particles langevin 1  1  0.5 890809
+fix my_thermo_stat_3 particles langevin 3  3  0.5 890809
 compute regional_thermo_3 particles temp/region my_shell_region_3
 fix_modify my_thermo_stat_3 temp regional_thermo_3
 
 
-fix my_thermo_stat_4 particles langevin 1  1  0.5 890809
+fix my_thermo_stat_4 particles langevin 3  3  0.5 890809
 compute regional_thermo_4 particles temp/region my_shell_region_4
 fix_modify my_thermo_stat_4 temp regional_thermo_4
 
 
-fix my_thermo_stat_5 particles langevin 1  1  0.5 890809
+fix my_thermo_stat_5 particles langevin 3  3  0.5 890809
 compute regional_thermo_5 particles temp/region my_shell_region_5
 fix_modify my_thermo_stat_5 temp regional_thermo_5
 
