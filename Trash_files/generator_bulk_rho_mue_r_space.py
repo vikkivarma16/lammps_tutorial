@@ -66,6 +66,7 @@ def bulk_rho_mue_r_space():
         densities = [sp.symbols(f"rho{i}") for i in range(len(epsilonij))]
 
         
+        
         fideal = densities[0] * sp.log(densities[0]) - densities[0]
         for i in range(1, len(epsilonij)):
             fideal += densities[i] * sp.log(densities[i]) - densities[i]
@@ -195,7 +196,7 @@ def bulk_rho_mue_r_space():
     
         rhos.append(species[species_type])
         # Initialize total chemical potential for the current species
-        j = 0
+        j = i
         for other_species, rho_other in species.items():
             # Determine the interaction data key
             interaction_key1 = f"{species_type}{other_species}"
@@ -241,7 +242,7 @@ def bulk_rho_mue_r_space():
             
             j = j+1
 
-        j = 0 
+        j = i 
         for other_species, rho_other in species.items():
             # Determine the interaction data key
             
@@ -290,7 +291,7 @@ def bulk_rho_mue_r_space():
             j = j+1
                 
         
-        j = 0
+        j = i
         for other_species, rho_other in species.items():
             # Determine the interaction data key
             
@@ -345,7 +346,16 @@ def bulk_rho_mue_r_space():
                 print("... so at least put some ghc potential")
                 exit(0)
                 
-                
+    
+    
+    for i in range(len (epsilonij)):
+        for j in range(i+1, len (epsilonij)):
+            epsilonij[j][i] = epsilonij[i][j]
+            sigmaij[j][i] = sigmaij[i][j]
+            interaction_type_ij[j][i] = interaction_type_ij[i][j]
+            
+            
+   
                
     valuemf = free_energy_mean_field(epsilonij, sigmaij, interaction_type_ij, rhos)
     

@@ -28,7 +28,7 @@ from pynufft import NUFFT
 from scipy.fft import fft , ifft
 import pyfftw.interfaces as fftw
 
-
+import scipy.integrate
 
 
 
@@ -257,11 +257,12 @@ for particle, rho in species.items():
             li=[]
             chi=[]
             i=3+pid*2
+            
             rho_ind.append(float(columns[i]))
             mue_ind.append (float(columns[i+1]))
     rho_r.append(rho_ind)
     mue_r.append(mue_ind)
-    pid = pid+2
+    pid = pid+1
     # Convert lists to numpy arrays
 x = np.array(x)
 y = np.array(y)
@@ -408,7 +409,7 @@ for species_type, rho_value in species.items():
 
     rhos.append(species[species_type])
     # Initialize total chemical potential for the current species
-    j = 0
+    j = i
     for other_species, rho_other in species.items():
         # Determine the interaction data key
         interaction_key1 = f"{species_type}{other_species}"
@@ -455,7 +456,7 @@ for species_type, rho_value in species.items():
             sigmaij[i][j] = sigma_ij
         j = j+1
 
-    j = 0
+    j = i
     for other_species, rho_other in species.items():
         # Determine the interaction data key
         
@@ -506,7 +507,7 @@ for species_type, rho_value in species.items():
         j = j+1
 
             
-    j = 0
+    j = i
     for other_species, rho_other in species.items():
         # Determine the interaction data key
         
@@ -553,19 +554,29 @@ for species_type, rho_value in species.items():
     # Store the total chemical potential for the species
     i = i+1
     
+for i in range(len (epsilonij)):
+    for j in range(i+1, len (epsilonij)):
+        epsilonij[j][i] = epsilonij[i][j]
+        sigmaij[j][i] = sigmaij[i][j]
+        interaction_type_ij[j][i] = interaction_type_ij[i][j]
+
+    
 import sympy as sp
-from sympy import log, diff
+from sympy import log, diff, lambdify
 from scipy import integrate
 from scipy.special import j0
 
 
 if (grand_rosenfeld_flag == 1):
 
+
     def hard_core_approach(sigmai, rhos, flag):
         
         variables = [[sp.symbols(f"n{j}_{i} ") for j in range(6)] for i in range(len(sigmai))]
         etas = [ variables[i][3] for i in range(len(sigmai))]
         
+        
+
 
         fac1 = 1 - sum(etas)
         fac2 = sum(etas[i] for i in range(len(sigmai)) if flag[i] == 1)
@@ -609,39 +620,74 @@ if (grand_meanfield_flag == 1):
         k_values = np.linspace(0.00001, 5, 100)
         
         
-        variables= [[sp.symbols(f"pot_{i}_{j} ") for j in range(len(sigmaij))] for i in range(len(sigmaij))]
+        new_variables= [[sp.symbols(f"pot_{i}_{j}") for j in range(len(sigmaij))] for i in range(len(sigmaij))]
         
         densities = [sp.symbols(f"rho_{i}") for i in range(len(epsilonij))]
 
+
         
-        fext = 0
-        for i in range(len(epsilonij)):
-            for j in range(len(epsilonij)):
-                fext += 0.5 * variables[i][j] * densities[i] * densities[j]
+        fext =  sum(0.5 * new_variables[i][j] * densities[i] * densities[j] for j in range(len(sigmaij)) for i in range(len(sigmaij)))
                 
        
        
         t_variables  = []
+        
+        for j in range(len(epsilonij)):
+            t_variables.append(densities[j])     
         for i in range(len(epsilonij)):
             for j in range(len(epsilonij)):
-                t_variables.append(variables[i][j])
+                t_variables.append (new_variables[i][j])
                 
-        for i in range(len(epsilonij)):
-            t_variables.append(densities[i])
+       
+        
+        parf = [diff(fext, densities[i]) for i in range(len(epsilonij))]
         
         
-        parf = [diff(ftotal, densities[i]) for i in range(len(epsilonij))]
-
-        parf_func = [sp.lambdify(t_variables, parf[i], 'numpy') for i in range(len(epsilonij))]
+        parf_func = [sp.lambdify(t_variables, parf[i], 'numpy') for i in range(len(sigmaij)) ]
+    
 
         return parf_func
         
         
     pdphi_mf = free_energy_mean_field( epsilonij, sigmaij, interaction_type_ij, rhos)
+    
+
 
     
 
 
+
+
+def interaction_potential(r, epsilon, sigma, interaction_type):
+    if interaction_type == "wca":
+        if r < 2**(1/6) * sigma:
+            return -epsilon
+        elif r < 5 * sigma:
+            return 4 * epsilon * ((sigma / r)**12 - (sigma / r)**6)
+        else:
+            return 0
+            
+    if interaction_type == "mie":
+        if r < sigma:
+            return 0
+        elif r < 5 * sigma:
+            return 4 * epsilon * ((sigma / r)**48 - (sigma / r)**24)
+        else:
+            return 0        
+            
+    elif interaction_type == "gs":
+        return (np.pi * sigma**2) * epsilon * np.exp(-((r / sigma)**2))
+        
+    elif interaction_type == "yk":
+        kappa = 1.0 / sigma
+        return epsilon * np.exp(-kappa * r) / r if r != 0 else 0
+    
+    elif interaction_type == "hc":
+        return 0
+    
+    else:
+        return 0
+        
 
 
 
@@ -694,13 +740,14 @@ while (iteration < iteration_max):
                 if ( (1.0 - rho_alpha_r[particle][3, k]) > 0.00000001 and (rho_alpha_r[particle][3, k]) > 0.00000001):
                     variable  = []
                     for particle_in, rho_other_in in species.items():
-                        variable.append(rho_alpha_r[particle][0, k])
-                        variable.append(rho_alpha_r[particle][1, k])
-                        variable.append(rho_alpha_r[particle][2, k])
-                        variable.append(rho_alpha_r[particle][3, k])
-                        variable.append(rho_alpha_r[particle][4, k])
-                        variable.append(rho_alpha_r[particle][5, k])
-                        
+                        variable.append(rho_alpha_r[particle_in][0, k])
+                        variable.append(rho_alpha_r[particle_in][1, k])
+                        variable.append(rho_alpha_r[particle_in][2, k])
+                        variable.append(rho_alpha_r[particle_in][3, k])
+                        variable.append(rho_alpha_r[particle_in][4, k])
+                        variable.append(rho_alpha_r[particle_in][5, k])
+                    
+                    
                     tdphi[pid][0, k] =  pdphi[pid][0](*variable)
                     tdphi[pid][1, k] =  pdphi[pid][1](*variable)
                     tdphi[pid][2, k] =  pdphi[pid][2](*variable)
@@ -718,6 +765,7 @@ while (iteration < iteration_max):
                 dphi_k.append(dphi_k_alpha)
             dphi_k = np.array(dphi_k)
             dphi_k_new.append(dphi_k)
+            pid = pid + 1
                 
 
     
@@ -754,35 +802,107 @@ while (iteration < iteration_max):
                 df_ext_ind[i] = np.sum(f_ext_frag[pid][:, i])
             
             total_df_ext.append(df_ext_ind)
-           
-            
-        
-            
             pid = pid +1
       
+    
+    
+    
+    if (grand_meanfield_flag == 1):
+    
+        total_f_ext_mf = []
         
+        for i in range(len(epsilonij)):
+            f_ext_mf = np.zeros(nx)
+            
+            for j in range(nx):
+                integrant  = []
+                x_temp = []
+                px = x[j]
+                
+                for k in range(nx):
+                    if (abs(px - x[k]) <5):
+                        x_temp.append(x[k])
+                        r = abs(px- x[k])
+                        
+                        temp = np.zeros(len(epsilonij) + len(epsilonij) * len(epsilonij) )
+                        for l in range (len(epsilonij)):
+                            
+                            epsilon = epsilonij[i][l]
+                            sigma = sigmaij[i][l]
+                            interaction_type  =  interaction_type_ij[i][l]
+                            value =  interaction_potential(r, epsilon, sigma, interaction_type)
+                            
+                            temp[l] = rho_r_current[l][k]
+                            temp[len(epsilonij) + i*len(epsilonij) + l]= value
+                            temp[len(epsilonij) + l*len(epsilonij) + i]= value
+    
+                            
+                       
+                        
+                        
+                        integr = pdphi_mf[i](*temp)
+                        
+                        
+                        integrant.append(integr)
+                
+                
+                x_temp = np.array(x_temp)
+                integrant = np.array(integrant)
+                integral = scipy.integrate.simpson(integrant, x_temp)
+                f_ext_mf[j] = integral
+                
+            total_f_ext_mf.append(f_ext_mf)
         
+     
+     
+     
         
     for i in range(nx):
             
         pid = 0
         for particle, rho_other in species.items():
+            
+            
+            free_energy = 0.0
+            
+            if (grand_rosenfeld_flag == 1):
+                free_energy = free_energy + total_df_ext[pid][i]
+            if (grand_meanfield_flag == 1):
+                free_energy = free_energy + total_f_ext_mf[pid][i]
                 
-            density = (np.exp( - v_ext[particle][i]/ temperature) * np.exp(mue_r[pid][i]) * np.exp( - total_df_ext[pid][i]) )
+                
+                
+            density = (np.exp( - v_ext[particle][i]/ temperature) * np.exp(mue_r[pid][i]) * np.exp( - free_energy) )
             
            
+            #print(free_energy + np.log(rho_r[pid][i]), mue_r[pid][i], rho_r[pid][i])
             
         
             
             rho_r_current[pid][i] = alpha * density + (1-alpha) * rho_r_initial[pid][i]
             
+            #   if (i == int(nx/2)):
             
+            #   print(pid, density, free_energy, mue_r[pid][i], v_ext[particle][i])
             
             rho_r_initial[pid][i] = rho_r_current[pid][i]
             
             pid = pid + 1
+    
+    for i in range(len(sigmai)):
+    
+        free_energy = 0.0
+            
+        if (grand_rosenfeld_flag == 1):
+            free_energy = free_energy + total_df_ext[i][int(nx/2)]
+        if (grand_meanfield_flag == 1):
+            free_energy = free_energy + total_f_ext_mf[i][int(nx/2)]
+                
+        print(free_energy + np.log(rho_r_current[i][int(nx/2)]), mue_r[i][int(nx/2)], rho_r_current[i][int(nx/2)], "\n")
+    
+    
     iteration =  iteration + 1 
-    print ("Number of iteration is given as :", iteration)
+    print ("Number of iteration is given as :", iteration, "\n\n")
     
 
 

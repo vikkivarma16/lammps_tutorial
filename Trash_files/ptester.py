@@ -1,9 +1,82 @@
   
 import numpy as np
 import sympy as sp
-from sympy import log, diff
+from sympy import log, diff, lambdify
 from scipy import integrate
 from scipy.special import j0
+
+
+
+
+
+def free_energy_mean_field( epsilonij, sigmaij, interaction_type_ij, rhos):
+    '''
+    k_values = np.linspace(0.00001, 5, 100)
+    
+    
+    new_variables= [[sp.symbols(f"pot_{i}_{j}") for j in range(len(sigmaij))] for i in range(len(sigmaij))]
+    
+    densities = [sp.symbols(f"rho_{i}") for i in range(len(epsilonij))]
+
+
+    print(densities)
+    fext =  sum(0.5 * new_variables[i][j] * densities[i] * densities[j] for j in range(len(sigmaij)) for i in range(len(sigmaij)))
+            
+   
+   
+    t_variables  = []
+    
+    for j in range(len(epsilonij)):
+        t_variables.append(densities[j])     
+    for i in range(1):
+        for j in range(len(epsilonij)):
+            t_variables.append (new_variables[i][j])
+            
+   
+    
+    parf = [diff(fext, densities[i]) for i in range(len(epsilonij))]
+    
+    '''
+    xt, yt, zt = sp.symbols("xt yt zt") 
+    
+    
+    fxt = xt**2 + yt + zt
+    
+    func_fxt  =  sp.lambdify((xt, yt, zt), fxt, 'numpy')
+    
+    
+    result = func_fxt(2, 3, 4)  # xt=2, yt=3, zt=4
+    print("Function output:", result)
+
+    
+    print("debugging part",func_fxt)
+    
+    '''
+    print(t_variables)
+    
+    print(parf[0])
+
+    parf_func = sp.lambdify(t_variables, parf[0], 'numpy') 
+    print(parf_func)
+    
+    '''
+    parf_func = 0
+    return parf_func
+        
+        
+epsilonij = [[0, 0, 1], [0, 0, 1], [0, 0, 1]]
+sigmaij =  [[0, 0, 1], [0, 0, 1], [1, 2, 3]] 
+interaction_type_ij =  [['gs', 'gs', 'gs'], ['gs', 'gs', 'gs'], ['gs', 'gs', 'gs']] 
+rhos = [1, 2, 2]
+        
+pdphi_mf = free_energy_mean_field( epsilonij, sigmaij, interaction_type_ij, rhos)
+    
+print (pdphi_mf)
+
+
+
+
+'''
 
 def hard_core_approach(sigmai, rhos, flag):
     
@@ -48,4 +121,5 @@ rhos = [2.4, 2.4, 0.001]
 
 functions =  hard_core_approach (sigmai, rhos, flag)
 
-print(functions)
+#print(functions)
+'''

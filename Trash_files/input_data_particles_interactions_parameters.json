@@ -2,19 +2,68 @@
     "particles_interactions_parameters": {
         "species": {
             "a": {
-                "rho_frac": 1.0
+                "rho_frac": 0.49994995495946354
+            },
+            "b": {
+                "rho_frac": 0.49994995495946354
+            },
+            "c": {
+                "rho_frac": 0.00010009008107296568
             }
         },
         "interactions": {
             "primary": {
                 "aa": {
-                    "type": "hc",
+                    "type": "gs",
                     "sigma": 1.0,
+                    "cutoff": 5.0,
+                    "epsilon": 2.0
+                },
+                "ab": {
+                    "type": "gs",
+                    "sigma": 0.849183,
+                    "cutoff": 5.0,
+                    "epsilon": 1.888
+                },
+                "ac": {
+                    "type": "gs",
+                    "sigma": 1.1,
+                    "cutoff": 3.4,
+                    "epsilon": 0.0
+                },
+                "bb": {
+                    "type": "gs",
+                    "sigma": 0.665,
+                    "cutoff": 5.0,
+                    "epsilon": 2.0
+                },
+                "bc": {
+                    "type": "gs",
+                    "sigma": 1.1,
+                    "cutoff": 3.4,
+                    "epsilon": 0.0
+                },
+                "cc": {
+                    "type": "hc",
+                    "sigma": 2.0,
+                    "cutoff": 5.0,
+                    "epsilon": 2.0
+                }
+            },
+            "secondary": {
+                "aa": {
+                    "type": "ghc",
+                    "sigma": 2.0,
+                    "cutoff": 3.2,
+                    "epsilon": 2.0
+                },
+                "bb": {
+                    "type": "ghc",
+                    "sigma": 2.0,
                     "cutoff": 3.2,
                     "epsilon": 2.0
                 }
             },
-            "secondary": {},
             "tertiary": {}
         }
     }

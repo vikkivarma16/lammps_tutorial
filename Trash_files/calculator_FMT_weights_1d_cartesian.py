@@ -15,17 +15,17 @@ def read_particle_data_from_json(json_file):
     
     # Parse interaction data from JSON
     for pair_type, values in data["particles_interactions_parameters"]["interactions"]["primary"].items():
-        if values["type"] == "hc":
+        if values["type"] == "hc" or  values["type"] == "ghc":
             interaction_types[pair_type] = values["type"]
             closest_distances[pair_type] = values["sigma"]
             
     for pair_type, values in data["particles_interactions_parameters"]["interactions"]["secondary"].items():
-        if values["type"] == "hc":
+        if values["type"] == "hc" or  values["type"] == "ghc":
             interaction_types[pair_type] = values["type"]
             closest_distances[pair_type] = values["sigma"]
             
     for pair_type, values in data["particles_interactions_parameters"]["interactions"]["tertiary"].items():
-        if values["type"] == "hc":
+        if values["type"] == "hc" or  values["type"] == "ghc":
             interaction_types[pair_type] = values["type"]
             closest_distances[pair_type] = values["sigma"]
         
@@ -64,7 +64,7 @@ def calculate_weight_function_k_space(particle_sizes, k_space, dimension):
             weight_function = []
             
             
-            print(size)
+           
             
             for kx, ky, kz in k_space:
                 weight_vector = [kx, ky, kz]
@@ -160,4 +160,4 @@ def fmt_weights_1d():
     print("\n\n... k space FMT weights have been calculated successfully and exported to the appropriate file ... \n\n\n")
 # Run the main function
 
-fmt_weights_1d()
+#fmt_weights_1d()

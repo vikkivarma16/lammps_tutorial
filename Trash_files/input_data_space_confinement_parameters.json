@@ -6,19 +6,19 @@
         },
         "box_properties": {
             "box_length": [
-                5.0,
-                5.0,
-                5.0
+                25.0,
+                25.0,
+                50.0
             ],
             "box_points": [
-                2000.0,
+                500.0,
                 100.0,
                 100.0
             ]
         },
         "walls_properties": {
             "walls_particles_type": [
-                "b"
+                "d"
             ],
             "walls_position": [
                 [
@@ -27,7 +27,7 @@
                     0.0
                 ],
                 [
-                    5.0,
+                    25.0,
                     0.0,
                     0.0
                 ]
@@ -46,7 +46,19 @@
             ],
             "walls_interactions": {
                 "primary": {
-                    "ab": {
+                    "ad": {
+                        "type": "custom_3",
+                        "sigma": 0.9333,
+                        "cutoff": 3.2,
+                        "epsilon": 0.1
+                    },
+                    "bd": {
+                        "type": "custom_3",
+                        "sigma": 0.9333,
+                        "cutoff": 3.2,
+                        "epsilon": 0.1
+                    },
+                    "cd": {
                         "type": "custom_3",
                         "sigma": 0.9333,
                         "cutoff": 3.2,

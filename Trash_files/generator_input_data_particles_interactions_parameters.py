@@ -98,7 +98,7 @@ def data_exporter_particles_interactions_parameters(input_file):
                                 "type": "gs",
                                 "sigma": 1.1,
                                 "cutoff": 3.4,
-                                "epsilon": 2.0
+                                "epsilon": 0.0
                             }
                         j = j+1
                     i = i+1
@@ -147,7 +147,7 @@ def data_exporter_particles_interactions_parameters(input_file):
                                 "type": "gs",
                                 "sigma": 1.1,
                                 "cutoff": 3.4,
-                                "epsilon": 2.0
+                                "epsilon": 0.0
                             }
                     
                     for prop in properties_list:
@@ -182,7 +182,7 @@ def data_exporter_particles_interactions_parameters(input_file):
                                 "type": "gs",
                                 "sigma": 1.1,
                                 "cutoff": 3.4,
-                                "epsilon": 2.0
+                                "epsilon": 0.0
                             }
                     
                     for prop in properties_list:
@@ -217,7 +217,7 @@ def data_exporter_particles_interactions_parameters(input_file):
                                 "type": "gs",
                                 "sigma": 1.1,
                                 "cutoff": 3.4,
-                                "epsilon": 2.0
+                                "epsilon": 0.0
                             }
                     
                     for prop in properties_list:

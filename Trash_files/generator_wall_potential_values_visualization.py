@@ -501,11 +501,11 @@ def wall_potential_values_visualization():
             colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']  # Blue, green, red, cyan, magenta, yellow, black
 
             # Plot all potentials in r-space and k-space side by side
-            fig, axes = plt.subplots(1, 2, figsize=(19, 8), dpi=100)  # Set figure size to 1900x1080 pixels
+            fig, axes = plt.subplots(1, 1, figsize=(10, 8), dpi=100)  # Set figure size to 1900x1080 pixels
 
             # Plot r-space potentials for the primary interaction
             for i, pair_type in enumerate(all_r_space["primary"].keys()):
-                axes[0].plot(all_r_space["primary"][pair_type], all_V_r["primary"][pair_type], 
+                axes.plot(all_r_space["primary"][pair_type], all_V_r["primary"][pair_type], 
                               label=f'{pair_type} {"primary"} ({interaction_types["primary"][pair_type].capitalize()})', 
                               linewidth=2.5, 
                               linestyle=line_styles[i % len(line_styles)], 
@@ -515,7 +515,7 @@ def wall_potential_values_visualization():
                               
             # Plot r-space potentials for the secondary interaction
             for i, pair_type in enumerate(all_r_space["secondary"].keys()):
-                axes[0].plot(all_r_space["secondary"][pair_type], all_V_r["secondary"][pair_type], 
+                axes.plot(all_r_space["secondary"][pair_type], all_V_r["secondary"][pair_type], 
                               label=f'{pair_type} {"secondary"} ({interaction_types["secondary"][pair_type].capitalize()})', 
                               linewidth=2.5, 
                               linestyle=line_styles[i % len(line_styles)], 
@@ -524,54 +524,24 @@ def wall_potential_values_visualization():
                               
             # Plot r-space potentials for the tertiary interaction
             for i, pair_type in enumerate(all_r_space["tertiary"].keys()):
-                axes[0].plot(all_r_space["tertiary"][pair_type], all_V_r["tertiary"][pair_type], 
+                axes.plot(all_r_space["tertiary"][pair_type], all_V_r["tertiary"][pair_type], 
                               label=f'{pair_type} {"tertiary"} ({interaction_types["tertiary"][pair_type].capitalize()})', 
                               linewidth=2.5, 
                               linestyle=line_styles[i % len(line_styles)], 
                               color=colors[i % len(colors)])  # Cycle through line styles and colors
                             
 
-            axes[0].set_title('Potential V(r) for all interaction pairs')
-            axes[0].set_xlabel('r')
-            axes[0].set_ylabel('V(r)')
-            axes[0].legend()
-            axes[0].grid(True)
-            axes[0].set_ylim(-10, 10)  # Set y-range for r-space plot
+            axes.set_title('Potential V(r) for all interaction pairs')
+            axes.set_xlabel('r')
+            axes.set_ylabel('V(r)')
+            axes.legend()
+            axes.grid(True)
+            axes.set_ylim(-10, 10)  # Set y-range for r-space plot
 
-            # Plot k-space potentials for the primary interactions
-            for i, pair_type in enumerate(all_k_space["primary"].keys()):
-                axes[1].plot(all_k_space["primary"][pair_type], all_V_k["primary"][pair_type], 
-                              label=f'{pair_type} {"primary"} ({interaction_types["primary"][pair_type].capitalize()})', 
-                              linewidth=2.5, 
-                              linestyle=line_styles[i % len(line_styles)], 
-                              color=colors[i % len(colors)])  # Cycle through line styles and colors
-            
-            # Plot k-space potentials for the secondary interactions
-            for i, pair_type in enumerate(all_k_space["secondary"].keys()):
-                axes[1].plot(all_k_space["secondary"][pair_type], all_V_k["secondary"][pair_type], 
-                              label=f'{pair_type} {"secondary"} ({interaction_types["secondary"][pair_type].capitalize()})', 
-                              linewidth=2.5, 
-                              linestyle=line_styles[i % len(line_styles)], 
-                              color=colors[i % len(colors)])  # Cycle through line styles and colors
-                              
-            
-            # Plot k-space potentials for the tertiary interactions
-            for i, pair_type in enumerate(all_k_space["tertiary"].keys()):
-                axes[1].plot(all_k_space["tertiary"][pair_type], all_V_k["tertiary"][pair_type], 
-                              label=f'{pair_type} {"tertiary"} ({interaction_types["tertiary"][pair_type].capitalize()})', 
-                              linewidth=2.5, 
-                              linestyle=line_styles[i % len(line_styles)], 
-                              color=colors[i % len(colors)])  # Cycle through line styles and colors
-                              
                               
                               
 
-            axes[1].set_title('Potential V(k) for all interaction pairs (Bessel Fourier Transform)')
-            axes[1].set_xlabel('k')
-            axes[1].set_ylabel('V(k)')
-            axes[1].legend()
-            axes[1].grid(True)
-            axes[1].set_ylim(-10, 10)  # Set y-range for r-space plot
+          
             
 
             plt.tight_layout()
@@ -629,10 +599,12 @@ def wall_potential_values_visualization():
     xs= positions[:,0]
     v_Ext = np.zeros_like(xs)
     total_potential=[]
-   
+    
+    
+    v_ext_species = {}
     for specimen in species_data:
         
-        v_ext_species = {}
+       
         v_ext_cast = np.zeros_like(xs)
         
         for i, position in enumerate(walls_positions):
@@ -697,8 +669,7 @@ def wall_potential_values_visualization():
     
     total_potential.append(v_Ext)
 
-    total_potential = np.array(total_potential) 
-    
+    total_potential = np.array(total_potential)  
     
             
     for key in v_ext_species:

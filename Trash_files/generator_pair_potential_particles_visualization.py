@@ -166,6 +166,8 @@ def pair_potential_particles_visualization():
             return gaussian_potential(r, epsilon, sigma)
         elif interaction_type == 'hc':
             return hard_core_potential(r, epsilon, sigma)
+        elif interaction_type == 'ghc':
+            return hard_core_potential(r, epsilon, sigma)
         elif interaction_type == "wca":
             return wca_potential(r, epsilon, sigma)
         elif "custom" in interaction_type:
@@ -264,6 +266,8 @@ def pair_potential_particles_visualization():
                 r_start = sigma*2.0**(1.0/6.0)
             elif interaction_model == 'hc':
                 r_start = sigma - 0.5
+            elif interaction_model == 'ghc':
+                r_start = sigma - 0.5
             elif interaction_model == 'wca':
                 r_start = 0.0
             elif "custom" in interaction_model:
@@ -330,6 +334,8 @@ def pair_potential_particles_visualization():
                 r_start = sigma - 0.5
             elif interaction_model == 'wca':
                 r_start = 0.0
+            elif interaction_model == 'ghc':
+                r_start = sigma - 0.5
             elif "custom" in interaction_model:
                 r_start = 0.0
             else:
@@ -391,6 +397,8 @@ def pair_potential_particles_visualization():
             elif interaction_model == 'lj':
                 r_start = sigma*2.0**(1.0/6.0)
             elif interaction_model == 'hc':
+                r_start = sigma - 0.5
+            elif interaction_model == 'ghc':
                 r_start = sigma - 0.5
             elif interaction_model == 'wca':
                 r_start = 0.0
