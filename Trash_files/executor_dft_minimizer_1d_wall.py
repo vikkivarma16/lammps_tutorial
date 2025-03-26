@@ -361,6 +361,26 @@ piee = np.pi
 
 
 
+json_file_particles_interactions = "input_data_particles_interactions_parameters.json"
+json_file_simulation_thermodynamics = "input_data_simulation_thermodynamic_parameters.json"
+r_space_file = "supplied_data_r_space.txt"
+output_file = "supplied_data_bulk_mue_rho_r_space.txt"
+
+
+
+# Load thermodynamic properties
+with open(json_file_simulation_thermodynamics, "r") as file:
+    data_thermodynamic = json.load(file)
+total_rho = data_thermodynamic["simulation_thermodynamic_parameters"]["rho"]
+temperature =  data_thermodynamic["simulation_thermodynamic_parameters"]["temperature"]
+
+
+# Load interaction properties
+with open(json_file_particles_interactions, 'r') as file:
+    data_interactions = json.load(file)
+interactions = data_interactions["particles_interactions_parameters"]["interactions"]
+data_species = data_interactions["particles_interactions_parameters"]
+species = {k: v["rho_frac"] * total_rho for k, v in data_species["species"].items()}  # Calculate rho for each species
 
 
 
@@ -380,6 +400,9 @@ rhos = []
 i = 0 
 j = 0
 grand_rosenfeld_flag = 0
+
+
+grand_meanfield_flag = 0
 
 for species_type, rho_value in species.items():
 
@@ -417,6 +440,7 @@ for species_type, rho_value in species.items():
                 exit(0)
         elif interaction_type == "ghc":
             grand_rosenfeld_flag = 1
+            grand_meanfield_flag = 1
             if species_type == other_species:
             # Approximate hard-core chemical potential contribution
                 sigmai_p[i] = sigma_ij
@@ -425,6 +449,7 @@ for species_type, rho_value in species.items():
                 exit(0)
                 
         else :
+            grand_meanfield_flag = 1
             interaction_type_ij[i][j] = interaction_type
             epsilonij[i][j] = epsilon
             sigmaij[i][j] = sigma_ij
@@ -463,6 +488,7 @@ for species_type, rho_value in species.items():
                 print("\n ...wrong parameters have been defined... \n")
                 exit(0)
         elif interaction_type == "ghc":
+            grand_meanfield_flag = 1
             grand_rosenfeld_flag = 1
             if species_type == other_species:
             # Approximate hard-core chemical potential contribution
@@ -472,6 +498,7 @@ for species_type, rho_value in species.items():
                 exit(0)
                 
         else :
+            grand_meanfield_flag = 1
             interaction_type_ij[i][j] = interaction_type
             epsilonij[i][j] = epsilon
             sigmaij[i][j] = sigma_ij
@@ -506,6 +533,7 @@ for species_type, rho_value in species.items():
                 exit(0)
         elif interaction_type == "ghc":
             grand_rosenfeld_flag = 1
+            grand_meanfield_flag = 1
             if species_type == other_species:
             # Approximate hard-core chemical potential contribution
                 sigmai_p[i] = sigma_ij
@@ -514,6 +542,7 @@ for species_type, rho_value in species.items():
                 exit(0)
                 
         else :
+            grand_meanfield_flag = 1
             interaction_type_ij[i][j] = interaction_type
             epsilonij[i][j] = epsilon
             sigmaij[i][j] = sigma_ij
@@ -524,7 +553,10 @@ for species_type, rho_value in species.items():
     # Store the total chemical potential for the species
     i = i+1
     
-
+import sympy as sp
+from sympy import log, diff
+from scipy import integrate
+from scipy.special import j0
 
 
 if (grand_rosenfeld_flag == 1):
@@ -547,35 +579,67 @@ if (grand_rosenfeld_flag == 1):
         diff_3 = [[[sp.diff(phi0, etas[i], etas[j], etas[k]) for k in range(len(sigmai))] for j in range(len(sigmai))] for i in range(len(sigmai))]
 
       
+        temp_variable = []
         
+        for i in range(len(sigmai)):
+            for j in range(6):
+                temp_variable.append(variables[i][j])
         
 
         phi1 = sum(variables[i][0] * diff_1[i] for i in range(len(sigmai)))
         phi2 = sum((variables[i][1] * variables[j][2] - variables[i][4] * variables[j][5]) * diff_2[i][j] for i in range(len(sigmai)) for j in range(len(sigmai)))
-        phi3 = sum((1/(8*np.pi)) * (variables[i][2]*variables[j][2]*variables[k][2]/3.0  - variables[i][2] *variables[j][5] * variables[k][5] + (3/2) * ( variables[i][5] *variables[j][5] * ((variables[i][2] - 4 * variables[i][3]/sigmai[i]) - variables[k][2]/2 ) - ((variables[i][2] - 4 * variables[i][3]/sigmai[i]) - variables[i][2]/2) * ((variables[i][2] - 4 * variables[i][3]/sigmai[i]) - variables[j][2]/2) * ((variables[i][2] - 4 * variables[i][3]/sigmai[i]) - variables[k][2]/2 ) + 2 * ( ((variables[i][2] - 4 * variables[i][3]/sigmai[i]) - variables[i][2]/2 )/2 *((variables[i][2] - 4 * variables[i][3]/sigmai[i]) - variables[j][2]/2 )/2 *((variables[i][2] - 4 * variables[i][3]/sigmai[i]) - variables[k][2]/2 ))    )  ) * diff_3[i][j][k] for i in range(len(sigmai)) for j in range(len(sigmai)) for k in range(len(sigmai)))
+        phi3 = (1/(8*np.pi)) *sum( ((variables[i][2]*variables[j][2]*variables[k][2]/3.0)  - variables[i][2] *variables[j][5] * variables[k][5] + (3.0/2.0) * ( variables[i][5] *variables[k][5] * ((variables[j][2] - 4.0 * variables[j][3]/sigmai[j]) - variables[j][2]/3 ) - ((variables[i][2] - 4.0 * variables[i][3]/sigmai[i]) - variables[i][2]/3) * ((variables[j][2] - 4 * variables[j][3]/sigmai[j]) - variables[j][2]/3) * ((variables[k][2] - 4 * variables[k][3]/sigmai[k]) - variables[k][2]/3 ) + 2.0 * ( ((variables[i][2] - 4.0 * variables[i][3]/sigmai[i]) - variables[i][2]/3 )/2 *((variables[j][2] - 4 * variables[j][3]/sigmai[j]) - variables[j][2]/3 )/2 *((variables[k][2] - 4 * variables[k][3]/sigmai[k]) - variables[k][2]/3 )/2 )    )  ) * diff_3[i][j][k] for i in range(len(sigmai)) for j in range(len(sigmai)) for k in range(len(sigmai)))
+        
+        phi3 = sp.simplify(phi3)
         
         total_phi = phi1+phi2+phi3
         
         
         functions = [[sp.diff(total_phi, variables[i][j]) for j in range(6)] for i in range(len(sigmai))]
         
-        functions_func = [[sp.lambdify(variables, functions[i][j], 'numpy') for j in range(6)] for i in range(len(sigmai))]
+        functions_func = [[sp.lambdify(temp_variable, functions[i][j], 'numpy') for j in range(6)] for i in range(len(sigmai))]
 
-        return functions
+        return functions_func
 
-
-
-
-
-
-
-
+    sigmai = sigmai_p
     pdphi = hard_core_approach(sigmai, rhos, flag)
 
+if (grand_meanfield_flag == 1):
+    def free_energy_mean_field( epsilonij, sigmaij, interaction_type_ij, rhos):
+        k_values = np.linspace(0.00001, 5, 100)
+        
+        
+        variables= [[sp.symbols(f"pot_{i}_{j} ") for j in range(len(sigmaij))] for i in range(len(sigmaij))]
+        
+        densities = [sp.symbols(f"rho_{i}") for i in range(len(epsilonij))]
 
+        
+        fext = 0
+        for i in range(len(epsilonij)):
+            for j in range(len(epsilonij)):
+                fext += 0.5 * variables[i][j] * densities[i] * densities[j]
+                
+       
+       
+        t_variables  = []
+        for i in range(len(epsilonij)):
+            for j in range(len(epsilonij)):
+                t_variables.append(variables[i][j])
+                
+        for i in range(len(epsilonij)):
+            t_variables.append(densities[i])
+        
+        
+        parf = [diff(ftotal, densities[i]) for i in range(len(epsilonij))]
 
+        parf_func = [sp.lambdify(t_variables, parf[i], 'numpy') for i in range(len(epsilonij))]
 
+        return parf_func
+        
+        
+    pdphi_mf = free_energy_mean_field( epsilonij, sigmaij, interaction_type_ij, rhos)
 
+    
 
 
 
@@ -597,7 +661,7 @@ while (iteration < iteration_max):
     fmt_flag = 0
     pid = 0
     
-    if (grand_rosenfeld_functional == 1):
+    if (grand_rosenfeld_flag == 1):
         pid = 0
         for particle, rho_other in species.items():
             rho_k_ind = fft(rho_r_current[pid])
@@ -630,7 +694,13 @@ while (iteration < iteration_max):
                 if ( (1.0 - rho_alpha_r[particle][3, k]) > 0.00000001 and (rho_alpha_r[particle][3, k]) > 0.00000001):
                     variable  = []
                     for particle_in, rho_other_in in species.items():
-                        variable.append( [rho_alpha_r[particle][0, k], rho_alpha_r[particle][1, k], rho_alpha_r[particle][2, k], rho_alpha_r[particle][3, k], rho_alpha_r[particle][4, k], rho_alpha_r[particle][5, k]] )
+                        variable.append(rho_alpha_r[particle][0, k])
+                        variable.append(rho_alpha_r[particle][1, k])
+                        variable.append(rho_alpha_r[particle][2, k])
+                        variable.append(rho_alpha_r[particle][3, k])
+                        variable.append(rho_alpha_r[particle][4, k])
+                        variable.append(rho_alpha_r[particle][5, k])
+                        
                     tdphi[pid][0, k] =  pdphi[pid][0](*variable)
                     tdphi[pid][1, k] =  pdphi[pid][1](*variable)
                     tdphi[pid][2, k] =  pdphi[pid][2](*variable)
@@ -681,16 +751,38 @@ while (iteration < iteration_max):
             df_ext_ind = np.zeros(nx)
             
             for i in range(nx):
-                df_ext_ind[i] = np.sum(fext_frag[pid][:, i])
+                df_ext_ind[i] = np.sum(f_ext_frag[pid][:, i])
             
             total_df_ext.append(df_ext_ind)
+           
+            
+        
+            
             pid = pid +1
-        
       
-        print(total_df_ext[0][0])
         
-        exit(0)
-    
+        
+        
+    for i in range(nx):
+            
+        pid = 0
+        for particle, rho_other in species.items():
+                
+            density = (np.exp( - v_ext[particle][i]/ temperature) * np.exp(mue_r[pid][i]) * np.exp( - total_df_ext[pid][i]) )
+            
+           
+            
+        
+            
+            rho_r_current[pid][i] = alpha * density + (1-alpha) * rho_r_initial[pid][i]
+            
+            
+            
+            rho_r_initial[pid][i] = rho_r_current[pid][i]
+            
+            pid = pid + 1
+    iteration =  iteration + 1 
+    print ("Number of iteration is given as :", iteration)
     
 
 
