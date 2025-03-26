@@ -1,0 +1,61 @@
+{
+    "space_confinement_parameters": {
+        "space_properties": {
+            "dimension": 1,
+            "confinement": "abox"
+        },
+        "box_properties": {
+            "box_length": [
+                5.0,
+                5.0,
+                5.0
+            ],
+            "box_points": [
+                2000.0,
+                100.0,
+                100.0
+            ]
+        },
+        "walls_properties": {
+            "walls_particles_type": [
+                "b"
+            ],
+            "walls_position": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    5.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "walls_normal": [
+                [
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    1.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "walls_interactions": {
+                "primary": {
+                    "ab": {
+                        "type": "custom_3",
+                        "sigma": 0.9333,
+                        "cutoff": 3.2,
+                        "epsilon": 0.1
+                    }
+                },
+                "secondary": {},
+                "tertiary": {}
+            }
+        }
+    }
+}

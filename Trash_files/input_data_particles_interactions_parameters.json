@@ -1,0 +1,21 @@
+{
+    "particles_interactions_parameters": {
+        "species": {
+            "a": {
+                "rho_frac": 1.0
+            }
+        },
+        "interactions": {
+            "primary": {
+                "aa": {
+                    "type": "hc",
+                    "sigma": 1.0,
+                    "cutoff": 3.2,
+                    "epsilon": 2.0
+                }
+            },
+            "secondary": {},
+            "tertiary": {}
+        }
+    }
+}
