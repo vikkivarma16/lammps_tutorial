@@ -28,7 +28,7 @@ def data_exporter_simulation_thermodynamic_parameters(input_file):
         lines = file.readlines()
     # Parsing the input file
 
-    for key in ["temperature", "rho", "iteration_max", "pressure"]:
+    for key in ["temperature", "rho", "iteration_max", "pressure", "secondary_rho"]:
         thermodynamic_properties[key] = "NA"
     
     for line in lines:
@@ -43,7 +43,7 @@ def data_exporter_simulation_thermodynamic_parameters(input_file):
             value = value.strip()  # Remove quotes around strings
 
             
-            if key in ["temperature", "rho", "iteration_max", "pressure"]:
+            if key in ["temperature", "rho", "iteration_max", "pressure", "secondary_rho"]:
                 
                 if key== "iteration_max":
                     thermodynamic_properties[key] = int(value)

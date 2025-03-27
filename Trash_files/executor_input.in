@@ -33,7 +33,9 @@ particle_types = "cgrained"
 
 species =  a , b, c 
 
-species_fraction = 0.4995, 0.4995, 0.0001
+species_fraction = 0.40131, 0.010688, 0.13749
+
+secondary_species_fraction =   0.009019, 0.40858, 0.0501521
 
 
 
@@ -47,10 +49,12 @@ species_fraction = 0.4995, 0.4995, 0.0001
 
 # primary interactions
 
-interaction: aa = gs,  sigma = 1.0, cutoff = 5, epsilon=2
-interaction: ab = gs,  sigma = 0.849183, cutoff = 5, epsilon=1.8880
-interaction: bb = gs,  sigma = 0.665, cutoff = 5, epsilon=2
-interaction: cc = hc,  sigma = 2.0, cutoff = 5, epsilon=2
+interaction: aa = gs,  sigma = 1.414, cutoff = 5, epsilon=2
+interaction: ab = gs,  sigma = 1.414, cutoff = 5, epsilon=2.5
+interaction: ac = gs,  sigma = 1., cutoff = 5, epsilon=-0.7
+interaction: bb = gs,  sigma = 1.414, cutoff = 5, epsilon=2
+interaction: cc = hc,  sigma = 0.9, cutoff = 5, epsilon=2
+
 
 
 wall_interaction: ad = custom_3,  sigma = 0.9333, cutoff = 3.2, epsilon=0.1 
@@ -64,8 +68,8 @@ wall_interaction: cd = custom_3,  sigma = 0.9333, cutoff = 3.2, epsilon=0.1
 
 #interaction: aa = wca,  sigma = 1.2, cutoff = 3.2, epsilon=1.0
 
-interaction: aa = ghc,  sigma = 2.0, cutoff = 3.2, epsilon=2
-interaction: bb = ghc,  sigma = 2.0, cutoff = 3.2, epsilon=2
+interaction: aa = ghc,  sigma = 1.0, cutoff = 3.2, epsilon=2
+interaction: bb = ghc,  sigma = 1.0, cutoff = 3.2, epsilon=2
 
 
 
@@ -76,10 +80,12 @@ temperature = 1
 
 # in kelvin
 
-rho = 5.24
+rho = 0.54949
+
+secondary_rho = 0.467748
 
 # in the reduced unit
 
-iteration_max = 500
+iteration_max = 5000
 
 # maximum number of iteration 

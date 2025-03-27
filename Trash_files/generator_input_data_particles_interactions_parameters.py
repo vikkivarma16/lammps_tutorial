@@ -113,7 +113,16 @@ def data_exporter_particles_interactions_parameters(input_file):
                     total_rho = total_rho + float(rho_values[i].strip())
     
                 for i, name in enumerate(species_data.keys()):
-                    species_data[name]["rho_frac"] = float(rho_values[i].strip()) / total_rho
+                    species_data[name]["rho_frac"] = float(rho_values[i].strip()) 
+            elif key == "secondary_species_fraction":
+                rho_values = value.split(",")
+                
+                total_rho=0.0
+                for i, name in enumerate(species_data.keys()):
+                    total_rho = total_rho + float(rho_values[i].strip())
+    
+                for i, name in enumerate(species_data.keys()):
+                    species_data[name]["secondary_rho_frac"] = float(rho_values[i].strip()) 
 
             elif key in ["temperature", "rho", "iteration_max"]:
                 thermodynamic_properties[key] = float(value)

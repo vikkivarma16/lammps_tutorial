@@ -22,6 +22,7 @@ def bulk_rho_mue_r_space():
     with open(json_file_simulation_thermodynamics, "r") as file:
         data_thermodynamic = json.load(file)
     total_rho = data_thermodynamic["simulation_thermodynamic_parameters"]["rho"]
+    secondary_total_rho = data_thermodynamic["simulation_thermodynamic_parameters"]["secondary_rho"]
     temperature =  data_thermodynamic["simulation_thermodynamic_parameters"]["temperature"]
 
 
@@ -30,7 +31,8 @@ def bulk_rho_mue_r_space():
         data_interactions = json.load(file)
     interactions = data_interactions["particles_interactions_parameters"]["interactions"]
     data_species = data_interactions["particles_interactions_parameters"]
-    species = {k: v["rho_frac"] * total_rho for k, v in data_species["species"].items()}  # Calculate rho for each species
+    species = {k: v["rho_frac"]  for k, v in data_species["species"].items()}  # Calculate rho for each species
+    secondary_species = {k: v["secondary_rho_frac"] for k, v in data_species["species"].items()}  # Calculate rho for each species
 
     
     
@@ -144,7 +146,7 @@ def bulk_rho_mue_r_space():
             if r < sigma:
                 return 0
             elif r < 5 * sigma:
-                return 4 * epsilon * ((sigma / r)**48 - (sigma / r)**24)
+                return -4 * epsilon * ((sigma / r)**48 - (sigma / r)**24)
             else:
                 return 0        
                 
@@ -187,6 +189,7 @@ def bulk_rho_mue_r_space():
 
     
     rhos = []
+    secondary_rhos = []
     
     i = 0 
     j = 0
@@ -195,6 +198,8 @@ def bulk_rho_mue_r_space():
     for species_type, rho_value in species.items():
     
         rhos.append(species[species_type])
+        secondary_rhos.append(secondary_species[species_type])
+        
         # Initialize total chemical potential for the current species
         j = i
         for other_species, rho_other in species.items():
@@ -368,26 +373,79 @@ def bulk_rho_mue_r_space():
     
     for i in range(len(species)):
         bulk_mue.append(valuemf[i] + valuehc[i])
+        
+        
+    secondary_valuemf = free_energy_mean_field(epsilonij, sigmaij, interaction_type_ij, secondary_rhos)
+    
+    sigmai = sigmai_p
+    if (grand_rosenfeld_flag == 1):
+        secondary_valuehc = hard_core_approach(sigmai, secondary_rhos, flag)
+    
+    bulk_mue =[]
+    
+    
+    for i in range(len(species)):
+        bulk_mue.append(valuemf[i] + valuehc[i])
+    
+    
+    secondary_bulk_mue =[]
+    
+    
+    for i in range(len(species)):
+        secondary_bulk_mue.append(secondary_valuemf[i] + secondary_valuehc[i])
+    
     
     # Load r-space data
     r_space_data = np.loadtxt(r_space_file)
+    
+    
+    warning  = 0.0
+    
+    for i in range(len(bulk_mue)):
+        warning  =  abs(bulk_mue[i]- secondary_bulk_mue[i]) + warning
+        
+    if (warning >1.0):
+        print("... exiting the computation, too much off densities")
+        exit(0)
+    else:
+    
+        print ("...with this differnece", warning, " I am proceeding with the computation..." )
+        
+        for i in range(len(bulk_mue)):
+            secondary_bulk_mue[i] =  bulk_mue[i] + 0.01 * bulk_mue[i]
 
     # Create output data with r positions, rho, and chemical potential values for each point
     output_data = []
+    it  = 0
     for r_point in r_space_data:
         row = list(r_point)  # Initial columns are the position (x, y, z) in r-space
-        i=0
-        for species_type, rho_value in species.items():
-            row.append(rho_value)  # Append rho value for the species
-           
-            row.append(bulk_mue[i])  # Append the calculated chemical potential for the species
-            i = i+1
+        
+        if (it < int(0.5*len(r_space_data))):
+            i=0
+            for species_type, rho_value in species.items():
+            
+                row.append(rho_value)  # Append rho value for the species
+                row.append(bulk_mue[i])  # Append the calculated chemical potential for the species    
+                i = i+1
+                
+        else:
+            i=0
+            for species_type, rho_value in secondary_species.items():
+            
+                row.append(rho_value)  # Append rho value for the species
+                row.append(secondary_bulk_mue[i])  # Append the calculated chemical potential for the species    
+                i = i+1
+            
         output_data.append(row)
+        
+        it  = it + 1 
 
     # Save output to text file
     np.savetxt(output_file, output_data, fmt="%.6f", header="x y z rho mue")
+    
+   
 
-    print(f"\n\n... uniform rho and mue has been assigned to each r space points and exported to the supplied data file section ...\n\n\n")
-
+    print(f"\n\n... uniform rho and mue with a phase interface has been assigned to each r space points and exported to the supplied data file section ...\n\n\n")
+    
 # Run the function
 #bulk_rho_mue_r_space()

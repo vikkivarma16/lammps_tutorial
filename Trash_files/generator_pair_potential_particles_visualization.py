@@ -20,6 +20,10 @@ def pair_potential_particles_visualization():
     # Lennard-Jones potential
     def lennard_jones_potential(r, epsilon, sigma):
         return 4 * epsilon * ((sigma / r) ** 12 - (sigma / r) ** 6)
+        
+        
+    def mie_potential(r, epsilon, sigma):
+        return -4 * epsilon * ((sigma / r) ** 48 - (sigma / r) ** 24)
 
     # Gaussian potential
     def gaussian_potential(r, epsilon, sigma):
@@ -27,7 +31,7 @@ def pair_potential_particles_visualization():
 
     def hard_core_potential(r, epsilon, sigma):
         
-        large_value=1e6
+        large_value=100000000
         
         smoothing_width=0.05
         
@@ -166,6 +170,8 @@ def pair_potential_particles_visualization():
             return gaussian_potential(r, epsilon, sigma)
         elif interaction_type == 'hc':
             return hard_core_potential(r, epsilon, sigma)
+        elif interaction_type == 'mie':
+            return mie_potential(r, epsilon, sigma)
         elif interaction_type == 'ghc':
             return hard_core_potential(r, epsilon, sigma)
         elif interaction_type == "wca":
@@ -268,6 +274,8 @@ def pair_potential_particles_visualization():
                 r_start = sigma - 0.5
             elif interaction_model == 'ghc':
                 r_start = sigma - 0.5
+            elif interaction_model == 'mie':
+                r_start = sigma
             elif interaction_model == 'wca':
                 r_start = 0.0
             elif "custom" in interaction_model:
@@ -332,6 +340,8 @@ def pair_potential_particles_visualization():
                 r_start = sigma*2.0**(1.0/6.0)
             elif interaction_model == 'hc':
                 r_start = sigma - 0.5
+            elif interaction_model == 'mie':
+                r_start = sigma
             elif interaction_model == 'wca':
                 r_start = 0.0
             elif interaction_model == 'ghc':
@@ -396,6 +406,8 @@ def pair_potential_particles_visualization():
                 r_start = 0.0
             elif interaction_model == 'lj':
                 r_start = sigma*2.0**(1.0/6.0)
+            elif interaction_model == 'mie':
+                r_start = sigma
             elif interaction_model == 'hc':
                 r_start = sigma - 0.5
             elif interaction_model == 'ghc':

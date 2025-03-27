@@ -113,7 +113,7 @@ except Exception as e:
 try:
     mf_weights()
 except Exception as e:
-    print ("Error while calculating FMT weights in k space ... \n")
+    print ("Error while calculating mf weights in k space ... \n")
     exit(0)
 
 
@@ -723,7 +723,7 @@ def interaction_potential(r, epsilon, sigma, interaction_type):
         if r < sigma:
             return 0
         elif r < 5 * sigma:
-            return 4 * epsilon * ((sigma / r)**48 - (sigma / r)**24)
+            return -4 * epsilon * ((sigma / r)**48 - (sigma / r)**24)
         else:
             return 0        
             
@@ -746,7 +746,7 @@ def interaction_potential(r, epsilon, sigma, interaction_type):
 
 
 threshold = 0.001
-alpha = 0.02
+alpha = 0.01
 
 print("\n\n...number of iteration is given as:", iteration_max, "\n\n")
 
@@ -979,7 +979,6 @@ while (iteration < iteration_max):
     
 
 
-print(rho_r_current)
 
 line_styles = ['-', '--', '-.', ':']
 colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
@@ -992,7 +991,7 @@ for i, key in enumerate(species):
     # Cycle through line styles and colors
     style = line_styles[i % len(line_styles)]
     color = colors[i % len(colors)]
-    plt.plot(x, rho_r_current[i], marker='o', linestyle=style, color=color, label=f'Species {key}')
+    plt.plot(x, rho_r_current[i]/np.sum(rho_r_current[i]), marker='o', linestyle=style, color=color, label=f'Species {key}')
     #plt.ylim(0, 0.004)
 
 # Plot customization

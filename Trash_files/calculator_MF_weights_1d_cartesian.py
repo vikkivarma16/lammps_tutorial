@@ -47,8 +47,70 @@ def calculator_mf_weight_1d():
         return integral
 
 
-    
+    def interaction_potential(r, epsilon, sigma, interaction_type):
+        
+        if interaction_type == "wca":
+            if r < 2**(1/6) * sigma:
+                return -epsilon
+            elif r < 5 * sigma:
+                return 4 * epsilon * ((sigma / r)**12 - (sigma / r)**6)
+            else:
+                return 0
+                
+        if interaction_type == "mie":
+            if r < sigma:
+                return 0
+            elif r < 5 * sigma:
+                return -4 * epsilon * ((sigma / r)**48 - (sigma / r)**24)
+            else:
+                return 0        
+                
+        elif interaction_type == "gs":
+            return epsilon * np.exp(-((r / sigma)**2))
+            
+        elif interaction_type == "yk":
+            kappa = 1.0 / sigma
+            return epsilon * np.exp(-kappa * r) / r if r != 0 else 0
+        
+        elif interaction_type == "hc":
+            return 0
+        
+        else:
+            return 0
 
+    def interaction_potential_r_1d(r, epsilon, sigma, interaction_type):
+        
+        if interaction_type == "wca":
+            if r < 2**(1/6) * sigma:
+                return -epsilon
+            elif r < 5 * sigma:
+                return 4 * epsilon * ((sigma / r)**12 - (sigma / r)**6)
+            else:
+                return 0
+                
+        if interaction_type == "mie":
+            if r < sigma:
+                return 0
+            elif r < 5 * sigma:
+                return -4 * epsilon * ((sigma / r)**48 - (sigma / r)**24)
+            else:
+                return 0        
+                
+        elif interaction_type == "gs":
+            return epsilon * sigma**2 * np.pi * np.exp(-((r /sigma)**2))
+            
+        elif interaction_type == "yk":
+            kappa = 1.0 / sigma
+            return epsilon * np.exp(-kappa * r) / r if r != 0 else 0
+        
+        elif interaction_type == "hc":
+            return 0
+        
+        else:
+            return 0
+        
+    
+    
     def interaction_potential_k_1d(k, epsilon, sigma, interaction_type):
         
         if interaction_type == "wca":
@@ -63,7 +125,7 @@ def calculator_mf_weight_1d():
             if r < sigma:
                 return 0
             elif r < 5 * sigma:
-                return 4 * epsilon * ((sigma / r)**48 - (sigma / r)**24)
+                return -4 * epsilon * ((sigma / r)**48 - (sigma / r)**24)
             else:
                 return 0        
                 
@@ -80,9 +142,6 @@ def calculator_mf_weight_1d():
         else:
             return 0
         
-    
-    
-    
     
     
     
@@ -279,6 +338,15 @@ def calculator_mf_weight_1d():
     k_space_file_path = 'supplied_data_k_space.txt'
     k_space = np.loadtxt(k_space_file_path)
     k_space = np.array(k_space)
+    
+    r_space_file_path = 'supplied_data_r_space.txt'
+    r_space = np.loadtxt(r_space_file_path)
+    r_space = np.array(r_space)
+    
+    r = r_space[:, 0]
+    
+    k_values = k_space[:, 0]
+    
     # Function to calculate weight function in k-space
     
     weight_functions = []
@@ -293,25 +361,50 @@ def calculator_mf_weight_1d():
             
             if (j>=i):
                 weight_function = []
-                for kx, ky, kz in k_space:
-                    weight_vector = [kx, ky, kz]
+                
+                '''
+                
+                '''
+                epsilon = epsilonij[i][j]
+                sigma =  sigmaij[i][j]
+                interaction_type = interaction_type_ij[i][j]
+
+                
+                if interaction_type == "gs" :
+                    for kx, ky, kz in k_space:
+                        weight_vector = [kx, ky, kz]
+                        
+                        
+                        
+                        
+                        k_value = kx
+                        mod_k = np.sqrt(k_value*k_value)
+                        
+                        
+                       
+                        weight  =  interaction_potential_k_1d(kx, epsilon, sigma, interaction_type)
+                        
+                        
+                        value = complex (weight) 
+                        
+                        weight_function.append(value)
+                else :
+                
                     
-                    epsilon = epsilonij[i][j]
-                    sigma =  sigmaij[i][j]
-                    interaction_type = interaction_type_ij[i][j]
+                    r_min = 0.0
+                    r_max = 5*sigma
+                    Vk = [hankel_transform(interaction_type, k, r_min, r_max, epsilon, sigma) for k in k_values]
                     
                     
-                    k_value = kx
-                    mod_k = np.sqrt(k_value*k_value)
-                    
-                    
+                    weight_function = [complex(Vk[i]) if (epsilon * Vk[i] > 0) else complex(0) for i in range(len(Vk))]
                    
-                    weight  =  interaction_potential_k_1d(kx, epsilon, sigma, interaction_type)
-                    
-                    
-                    value = complex (weight) 
-                    
-                    weight_function.append(value)
+                        
+                    for it in range (len(weight_function)):
+                        if abs(k_values[it])> 10 :
+                            weight_function[it] = 0  
+
+
+               
             
             j = j + 1
             
@@ -340,5 +433,4 @@ def calculator_mf_weight_1d():
         i = i + 1
 
     print("\n\n\n ... Mean field weight have been calculated and exported in the file ...")
-
-
+#calculator_mf_weight_1d()
