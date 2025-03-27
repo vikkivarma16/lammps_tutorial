@@ -86,7 +86,7 @@ from generator_bulk_rho_mue_r_space import bulk_rho_mue_r_space as brm
 from calculator_FMT_weights_1d_cartesian  import fmt_weights_1d as fm_weights
 
 
-
+from calculator_MF_weights_1d_cartesian   import calculator_mf_weight_1d as mf_weights
 
 
 
@@ -108,6 +108,13 @@ except Exception as e:
     print ("Error while calculating FMT weights in k space ... \n")
     exit(0)
 
+
+
+try:
+    mf_weights()
+except Exception as e:
+    print ("Error while calculating FMT weights in k space ... \n")
+    exit(0)
 
 
 from generator_wall_potential_values_visualization import wall_potential_values_visualization as wp_values
@@ -616,6 +623,51 @@ if (grand_rosenfeld_flag == 1):
     pdphi = hard_core_approach(sigmai, rhos, flag)
 
 if (grand_meanfield_flag == 1):
+
+    mf_weight = []
+    i = 0 
+    
+    
+    for key_1, rho_1 in species.items():
+         mf_weight_in = []
+         for key_2, rho_2 in species.items():
+            mf_weight_in.append(np.zeros(nx, dtype = complex))
+            
+         mf_weight.append(mf_weight_in)
+        
+    for key, rho in species.items():
+         # Initialize a list for individual species weights
+        j = 0
+       
+        for key_in, rho_in in species.items():
+            if (j >= i):
+                
+                # Open file for the current species
+                with open(f"supplied_data_weight_MF_k_space_{key}{key_in}.txt", "r") as file:
+                    k =0
+                    for line in file:
+                        # Skip comment lines
+                        if line.startswith("#"):
+                            continue
+
+                        # Split the line into columns and convert them to floats
+                        columns = line.strip().split()
+                       
+                        
+                        # Collect rho-related values for this species
+                    
+                   
+                        mf_weight[i][j][k] = complex(columns[0])
+                        mf_weight[j][i][k] = complex(columns[0])
+                        k = k+1
+                
+                
+            
+            j = j + 1
+        # Append the individual weights list to fmt_weights
+        i = i + 1
+
+    
     def free_energy_mean_field( epsilonij, sigmaij, interaction_type_ij, rhos):
         k_values = np.linspace(0.00001, 5, 100)
         
@@ -811,6 +863,8 @@ while (iteration < iteration_max):
     
         total_f_ext_mf = []
         
+        
+        '''
         for i in range(len(epsilonij)):
             f_ext_mf = np.zeros(nx)
             
@@ -852,6 +906,25 @@ while (iteration < iteration_max):
                 f_ext_mf[j] = integral
                 
             total_f_ext_mf.append(f_ext_mf)
+        '''
+        for i in range(len(epsilonij)):
+            
+            ind_mf_energy = np.zeros(nx)
+            for j in range(len(epsilonij)):
+                rho_k_ind = fft(rho_r_current[j])
+                
+                    
+                k_poden = np.zeros(nx, dtype=complex)
+                k_poden =  rho_k_ind*mf_weight[i][j]
+               
+                energy_r_ind= np.zeros(nx)
+                
+                energy_r_ind= ifft(k_poden).real
+                
+                ind_mf_energy =  ind_mf_energy + energy_r_ind
+            
+            total_f_ext_mf.append(ind_mf_energy)
+            
         
      
      

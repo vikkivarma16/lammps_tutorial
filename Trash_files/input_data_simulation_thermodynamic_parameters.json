@@ -1,7 +1,7 @@
 {
     "simulation_thermodynamic_parameters": {
         "temperature": 1.0,
-        "rho": 6.0,
+        "rho": 5.24,
         "iteration_max": 500,
         "pressure": "NA"
     }

@@ -9,9 +9,9 @@ space_confinement = abox
  
 # other options are like: abox, pcylinder, acylinder, asphere which is for the purpose of the aperiodic wall etc...
 
-box_extension = 25, 25, 50
+box_extension = 50, 25, 50
 
-box_points = 500, 100, 100
+box_points = 5000, 100, 100
 
 
 
@@ -22,7 +22,7 @@ aperiodicity_blocker: wall
 # here you can also define "na", "NA" or "none"
 
 wall: particles = d
-wall: position  = (0, 0, 0), (25, 0, 0) 
+wall: position  = (0, 0, 0), (50, 0, 0) 
 wall: orientation  = (1, 0, 0), (1, 0, 0)
 
 
@@ -33,7 +33,7 @@ particle_types = "cgrained"
 
 species =  a , b, c 
 
-species_fraction = 0.4, 0.4, 0.2
+species_fraction = 0.4995, 0.4995, 0.0001
 
 
 
@@ -76,7 +76,7 @@ temperature = 1
 
 # in kelvin
 
-rho = 0.45
+rho = 5.24
 
 # in the reduced unit
 
