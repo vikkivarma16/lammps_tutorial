@@ -33,9 +33,9 @@ particle_types = "cgrained"
 
 species =  a , b, c 
 
-species_fraction = 0.40131, 0.010688, 0.13749
+species_fraction = 0.40131, 0.010688, 0.137499
 
-secondary_species_fraction =   0.009019, 0.40858, 0.0501521
+secondary_species_fraction =   0.00901394, 0.40858, 0.0501521
 
 
 

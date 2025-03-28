@@ -411,8 +411,7 @@ def bulk_rho_mue_r_space():
     
         print ("...with this differnece", warning, " I am proceeding with the computation..." )
         
-        for i in range(len(bulk_mue)):
-            secondary_bulk_mue[i] =  bulk_mue[i] + 0.01 * bulk_mue[i]
+       
 
     # Create output data with r positions, rho, and chemical potential values for each point
     output_data = []

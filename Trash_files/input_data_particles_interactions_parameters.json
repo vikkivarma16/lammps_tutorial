@@ -3,14 +3,14 @@
         "species": {
             "a": {
                 "rho_frac": 0.40131,
-                "secondary_rho_frac": 0.009019
+                "secondary_rho_frac": 0.00901394
             },
             "b": {
                 "rho_frac": 0.010688,
                 "secondary_rho_frac": 0.40858
             },
             "c": {
-                "rho_frac": 0.13749,
+                "rho_frac": 0.137499,
                 "secondary_rho_frac": 0.0501521
             }
         },
